@@ -23,8 +23,13 @@ def load_data(filepath="data/telecom_churn.csv"):
     Returns:
         DataFrame with all columns.
     """
-    # TODO: Load the CSV and return the DataFrame
-    pass
+    
+    try:
+        df = pd.read_csv(filepath)
+        return df
+    except Exception as e:
+        print("Error loading data:", e)
+        return None
 
 
 def split_data(df, target_col, test_size=0.2, random_state=42):
@@ -39,8 +44,26 @@ def split_data(df, target_col, test_size=0.2, random_state=42):
     Returns:
         Tuple of (X_train, X_test, y_train, y_test).
     """
-    # TODO: Separate features and target, then split with stratification
-    pass
+    try:
+        X = df.drop(columns=[target_col])
+        y = df[target_col]
+
+        if target_col == "churned":
+            stratify = y
+        else:
+            stratify = None
+
+        X_train, X_test, y_train, y_test = train_test_split(
+            X, y,
+            test_size=test_size,
+            random_state=random_state,
+            stratify=stratify
+        )
+
+        return X_train, X_test, y_train, y_test
+    except Exception as e:
+        print("Split error:", e)
+        return None
 
 
 def build_logistic_pipeline():
@@ -49,8 +72,15 @@ def build_logistic_pipeline():
     Returns:
         sklearn Pipeline object.
     """
-    # TODO: Create and return a Pipeline with two steps
-    pass
+    pipe = Pipeline([
+        ("scaler", StandardScaler()),
+        ("model", LogisticRegression(
+            random_state=42,
+            max_iter=1000,
+            class_weight="balanced"
+        ))
+    ])
+    return pipe
 
 
 def build_ridge_pipeline():
@@ -59,8 +89,11 @@ def build_ridge_pipeline():
     Returns:
         sklearn Pipeline object.
     """
-    # TODO: Create and return a Pipeline for Ridge regression
-    pass
+    pipe = Pipeline([
+        ("scaler", StandardScaler()),
+        ("model", Ridge(alpha=1.0))
+    ])
+    return pipe
 
 
 def evaluate_classifier(pipeline, X_train, X_test, y_train, y_test):
@@ -74,8 +107,25 @@ def evaluate_classifier(pipeline, X_train, X_test, y_train, y_test):
     Returns:
         Dictionary with keys: 'accuracy', 'precision', 'recall', 'f1'.
     """
-    # TODO: Fit the pipeline on training data, predict on test, compute metrics
-    pass
+    from sklearn.metrics import (
+    classification_report, confusion_matrix,
+    mean_absolute_error, r2_score,
+    accuracy_score, precision_score, recall_score, f1_score
+       )
+    
+    pipeline.fit(X_train, y_train)
+    y_pred = pipeline.predict(X_test)
+
+    print(classification_report(y_test, y_pred))
+    print("Confusion Matrix:")
+    print(confusion_matrix(y_test, y_pred))
+
+    return {
+        "accuracy": accuracy_score(y_test, y_pred),
+        "precision": precision_score(y_test, y_pred),
+        "recall": recall_score(y_test, y_pred),
+        "f1": f1_score(y_test, y_pred)
+    }
 
 
 def evaluate_regressor(pipeline, X_train, X_test, y_train, y_test):
@@ -89,8 +139,19 @@ def evaluate_regressor(pipeline, X_train, X_test, y_train, y_test):
     Returns:
         Dictionary with keys: 'mae', 'r2'.
     """
-    # TODO: Fit the pipeline, predict, and compute MAE and R²
-    pass
+    pipeline.fit(X_train, y_train)
+    y_pred = pipeline.predict(X_test)
+
+    mae = mean_absolute_error(y_test, y_pred)
+    r2 = r2_score(y_test, y_pred)
+
+    print("MAE:", mae)
+    print("R2:", r2)
+
+    return {
+        "mae": mae,
+        "r2": r2
+         }
 
 
 def run_cross_validation(pipeline, X_train, y_train, cv=5):
@@ -105,8 +166,25 @@ def run_cross_validation(pipeline, X_train, y_train, cv=5):
     Returns:
         Array of cross-validation scores.
     """
-    # TODO: Run cross_val_score with StratifiedKFold
-    pass
+    try:
+        cv_splitter = StratifiedKFold(
+            n_splits=cv,
+            shuffle=True,
+            random_state=42
+        )
+
+        scores = cross_val_score(
+            pipeline,
+            X_train,
+            y_train,
+            cv=cv_splitter,
+            scoring="accuracy"
+        )
+
+        return scores
+    except Exception as e:
+        print("CV error:", e)
+        return None
 
 
 if __name__ == "__main__":
@@ -144,3 +222,12 @@ if __name__ == "__main__":
             if ridge_pipe:
                 reg_metrics = evaluate_regressor(ridge_pipe, X_tr, X_te, y_tr, y_te)
                 print(f"Ridge Regression: {reg_metrics}")
+"""
+Summary:
+
+The logistic regression model performed okay overall.
+Recall is more important in this case because missing churned customers is risky.
+Tenure and monthly charges made the biggest difference in our predictions.
+If we want better results, we should look into tuning the model 
+or maybe even test out some different algorithms.
+"""
