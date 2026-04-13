@@ -82,7 +82,6 @@ def build_logistic_pipeline():
     ])
     return pipe
 
-
 def build_ridge_pipeline():
     """Build a Pipeline with StandardScaler and Ridge regression.
 
@@ -113,10 +112,13 @@ def evaluate_classifier(pipeline, X_train, X_test, y_train, y_test):
     accuracy_score, precision_score, recall_score, f1_score
        )
     
+    from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score
+
     pipeline.fit(X_train, y_train)
     y_pred = pipeline.predict(X_test)
 
     print(classification_report(y_test, y_pred))
+
     print("Confusion Matrix:")
     print(confusion_matrix(y_test, y_pred))
 
@@ -152,6 +154,7 @@ def evaluate_regressor(pipeline, X_train, X_test, y_train, y_test):
         "mae": mae,
         "r2": r2
          }
+
 
 
 def run_cross_validation(pipeline, X_train, y_train, cv=5):
@@ -222,12 +225,16 @@ if __name__ == "__main__":
             if ridge_pipe:
                 reg_metrics = evaluate_regressor(ridge_pipe, X_tr, X_te, y_tr, y_te)
                 print(f"Ridge Regression: {reg_metrics}")
+
+
+
 """
 Summary:
 
-The logistic regression model performed okay overall.
-Recall is more important in this case because missing churned customers is risky.
-Tenure and monthly charges made the biggest difference in our predictions.
-If we want better results, we should look into tuning the model 
-or maybe even test out some different algorithms.
+The logistic regression model worked okay for this dataset. 
+Recall is more important here because missing churned customers is more risky than false alarms.
+Features like tenure and monthly charges had the biggest impact on the prediction.
+To improve the results, we could try tuning the model or testing other algorithms.
+
 """
+
