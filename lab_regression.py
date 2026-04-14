@@ -1,3 +1,4 @@
+#Update code to match the lab_regression.ipynb changes
 """
 Module 5 Week A — Lab: Regression & Evaluation
 
@@ -18,7 +19,6 @@ from sklearn.metrics import (classification_report, confusion_matrix,
                              mean_absolute_error, r2_score,
                              accuracy_score, precision_score, recall_score, f1_score
 )
-
 
 def load_data(filepath="data/telecom_churn.csv"):
     """Load the telecom churn dataset.
